@@ -1,0 +1,14 @@
+# .goreleaser.yml
+# Build customization
+builds:
+  - main: main.go
+    binary: vault-auth-google
+    goos:
+      - linux
+    goarch:
+      - amd64
+# Archive customization
+archive:
+  format: tar.gz
+  replacements:
+    amd64: 64-bit
