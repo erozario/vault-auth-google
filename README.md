@@ -119,7 +119,7 @@ firefox $(vault read -field=url auth/google/code_url)
 vault write auth/google/login code=$GOOGLE_CODE role=default
 ```
 
-## Setup in Local Envinroment
+## Setup in Local Environment
 
 * Clone this repo
 
