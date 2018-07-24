@@ -3,6 +3,7 @@ package google
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -15,6 +16,7 @@ const (
 	configPath                          = "config"
 	clientIDConfigPropertyName          = "client_id"
 	clientSecretConfigPropertyName      = "client_secret"
+	clientOAuthRedirectUrlPropertyName  = "redirect_url"
 	clientFetchGroupsConfigPropertyName = "fetch_groups"
 	configEntry                         = "config"
 )
@@ -23,12 +25,14 @@ func (b *backend) pathConfigWrite(ctx context.Context, req *logical.Request, dat
 	var (
 		clientID     = data.Get(clientIDConfigPropertyName).(string)
 		clientSecret = data.Get(clientSecretConfigPropertyName).(string)
+		redirectUrl  = data.Get(clientOAuthRedirectUrlPropertyName).(string)
 		fetchGroups  = data.Get(clientFetchGroupsConfigPropertyName).(bool)
 	)
 
 	entry, err := logical.StorageEntryJSON(configEntry, config{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
+		RedirectUrl:  redirectUrl,
 		FetchGroups:  fetchGroups,
 	})
 	if err != nil {
@@ -50,6 +54,7 @@ func (b *backend) pathConfigRead(ctx context.Context, req *logical.Request, data
 	configMap := map[string]interface{}{
 		clientIDConfigPropertyName:          config.ClientID,
 		clientSecretConfigPropertyName:      config.ClientSecret,
+		clientOAuthRedirectUrlPropertyName:  config.RedirectUrl,
 		clientFetchGroupsConfigPropertyName: config.FetchGroups,
 	}
 
@@ -79,19 +84,26 @@ func (b *backend) config(ctx context.Context, s logical.Storage) (*config, error
 type config struct {
 	ClientID     string `json:"client_id"`
 	ClientSecret string `json:"client_secret"`
+	RedirectUrl  string `json:"redirect_url"`
 	FetchGroups  bool   `json:"fetch_groups"`
 }
 
 func (c *config) oauth2Config() *oauth2.Config {
+	oauthRedirectUrl := c.RedirectUrl
+	if len(strings.TrimSpace(oauthRedirectUrl)) == 0 {
+		oauthRedirectUrl = "urn:ietf:wg:oauth:2.0:oob"
+	}
+
 	config := &oauth2.Config{
 		ClientID:     c.ClientID,
 		ClientSecret: c.ClientSecret,
 		Endpoint:     google.Endpoint,
-		RedirectURL:  "urn:ietf:wg:oauth:2.0:oob",
+		RedirectURL:  oauthRedirectUrl,
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.email",
 		},
 	}
+
 	if c.FetchGroups {
 		config.Scopes = append(config.Scopes, "https://www.googleapis.com/auth/admin.directory.group.readonly")
 	}
