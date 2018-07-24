@@ -51,6 +51,10 @@ func newBackend() *backend {
 						Type:        framework.TypeString,
 						Description: "Google application secret",
 					},
+					clientOAuthRedirectUrlPropertyName: &framework.FieldSchema{
+						Type:        framework.TypeString,
+						Description: "Google OAuth redirect URL",
+					},
 					clientFetchGroupsConfigPropertyName: &framework.FieldSchema{
 						Type:        framework.TypeBool,
 						Description: "Google fetch groups",
