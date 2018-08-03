@@ -113,9 +113,5 @@ func (c *config) oauth2Config() *oauth2.Config {
 			"https://www.googleapis.com/auth/userinfo.email",
 		},
 	}
-
-	if c.FetchGroups {
-		config.Scopes = append(config.Scopes, "https://www.googleapis.com/auth/admin.directory.group.readonly")
-	}
 	return config
 }
