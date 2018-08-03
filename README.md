@@ -68,6 +68,12 @@ authentication flow (that requires redirection), set as *Web application*.
 For bounding policies with G Suite email groups, the plugin requires access to
 the [Admin SDK](https://developers.google.com/admin-sdk/directory/v1/guides/authorizing).
 
+On more information about who to create OAuth credentials and Service Accounts
+for domain-wide delegation, check the docs:
+
+* [Creating an OAuth Credential on GCP](docs/oauth.md)
+* [Creating a Service Account on GCP for G Suite user impersonation](docs/service-account.md)
+
 
 ## Installation
 
