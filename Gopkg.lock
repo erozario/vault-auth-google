@@ -387,6 +387,7 @@
     "github.com/hashicorp/vault/logical",
     "github.com/hashicorp/vault/logical/framework",
     "github.com/hashicorp/vault/logical/plugin",
+    "golang.org/x/net/context",
     "golang.org/x/oauth2",
     "golang.org/x/oauth2/google",
     "google.golang.org/api/admin/directory/v1",
