@@ -19,5 +19,5 @@ credential is essencial in order to Vault verifies who you are.
 
 ## References
 
-* [Setting up OAuth 2.0](https://support.google.com/cloud/answer/6158849?hl=en)
-* [Enable and disable APIs](https://support.google.com/cloud/answer/6158841?hl=en&ref_topic=6262490)
+- [Setting up OAuth 2.0](https://support.google.com/cloud/answer/6158849?hl=en)
+- [Enable and disable APIs](https://support.google.com/cloud/answer/6158841?hl=en&ref_topic=6262490)

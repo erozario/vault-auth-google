@@ -49,9 +49,9 @@ use their permissions.
 
 ## References
 
-* **Google Groups Read-Only API scope**: `https://www.googleapis.com/auth/admin.directory.group.readonly`
-* [About admnistrator role](https://support.google.com/a/answer/33325?hl=en)
-* [Assign administrator to a user](https://support.google.com/a/answer/172176?hl=en)
-* [Understanding Service Accounts](https://cloud.google.com/iam/docs/understanding-service-accounts)
-* [Perform G Suite Domain-Wide Delegation of Authority](https://developers.google.com/admin-sdk/directory/v1/guides/delegation)
-* [OAuth 2.0 Scopes for Google APIs](https://developers.google.com/identity/protocols/googlescopes)
+- **Google Groups Read-Only API scope**: `https://www.googleapis.com/auth/admin.directory.group.readonly`
+- [About admnistrator role](https://support.google.com/a/answer/33325?hl=en)
+- [Assign administrator to a user](https://support.google.com/a/answer/172176?hl=en)
+- [Understanding Service Accounts](https://cloud.google.com/iam/docs/understanding-service-accounts)
+- [Perform G Suite Domain-Wide Delegation of Authority](https://developers.google.com/admin-sdk/directory/v1/guides/delegation)
+- [OAuth 2.0 Scopes for Google APIs](https://developers.google.com/identity/protocols/googlescopes)
