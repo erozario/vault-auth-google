@@ -1,7 +1,8 @@
 # Vault Auth Google
 
-A Vault plugin for authenticating and receiving policies via Google Accounts
-(Gmail and G Suite).
+A [Hashicorp Vault](https://github.com/hashicorp/vault) plugin that enables
+authentication and policy bounding via Google Accounts and Google Groups (G
+Suite only).
 
 
 ## Table of Contents
@@ -12,13 +13,11 @@ A Vault plugin for authenticating and receiving policies via Google Accounts
     - [From source](#from-source)
  - [Google API requirements](#google-api-requirements)
  - [Installation](#installation)
- - [Configuration](#configuration)
- - [Usage](#usage)
-    - [Creating roles](#creating-roles)
-       - [Gmail](#gmail)
-       - [G Suite](#g-suite)
-    - [Google's OAuth URL](#googles-oauth-url)
- - [Local environment setup](#local-environment-setup)
+ - [Configuration & Usage](#configuration--usage)
+    - [Parameters](#binary)
+    - [Local flow vs. Web-based flow](#local-flow-vs-web-based-flow)
+    - [How to...](#how-to)
+ - [Contributing](#contributing)
  - [License](#license)
 
 
@@ -31,11 +30,10 @@ A Vault plugin for authenticating and receiving policies via Google Accounts
 
 ## Getting
 
-After downloading the binary, move it into the [plugin
+You can get the plugin binary via the release page or building yourself. After
+getting the binary, move it into the [plugin
 directory](https://www.vaultproject.io/guides/operations/plugin-backends.html)
-configured at the Vault's configuration file. You can get the plugin binary via
-the release page or building yourself.
-
+set at the Vault's configuration file.
 
 ### Binary
 
@@ -50,37 +48,52 @@ Clone this repository and build via `make`:
 make all
 ```
 
-The make recipe requires [dep](https://github.com/golang/dep) in order to get the project's dependencies.
+The make recipe requires [dep](https://github.com/golang/dep) in order to get
+the project's dependencies.
 
-Alternatively, you can get the dependencies via `go get <dependency>`.
+Alternatively, you can get the dependencies via `go get`.
 
 
 ## Google API requirements
 
-In order to authenticate with your Google or G Suite account,
-`vault-auth-google` requires an OAuth client ID and secret. You can generate
-the client ID and secret at the Google Cloud Console, on the [credential
-section](https://console.cloud.google.com/apis/credentials).
+`vault-auth-google` requires an OAuth2 credential in order to authenticate
+Google Accounts into Vault. For G Suite users with group bounding, the plugin
+also requires a domain-wide service account for user impersonation.
 
-For a local oauth flow, set the credential type as *Other*. For an online
-authentication flow (that requires redirection), set as *Web application*.
+Though it requires the `Admin SDK` API enabled, `vault-auth-google` only make
+use of the [admin.directory.group.readonly](https://developers.google.com/admin-sdk/directory/v1/guides/authorizing)
+function.
 
-For bounding policies with G Suite email groups, the plugin requires access to
-the [Admin SDK](https://developers.google.com/admin-sdk/directory/v1/guides/authorizing).
+For more information on how to create OAuth2 credentials and service account
+keys, check the docs:
+
+* [Creating an OAuth Credential on GCP](docs/oauth.md)
+* [Creating a Service Account on GCP for G Suite user impersonation](docs/service-account.md)
 
 
 ## Installation
 
-* Calculate and register the SHA256 sum of the plugin in Vault's plugin catalog:
+Third-party auth methods, such as this, cannot be enabled the same way as
+native [auth methods](https://www.vaultproject.io/docs/auth/index.html). To
+install it, add the plugin into the [plugin
+catalog](https://www.vaultproject.io/docs/internals/plugins.html#plugin-catalog).
+
+* After [getting the plugin](#getting) binary, calculate the SHA256 of it and stores it
+  inside an environment variable for easy reference.
 
 ```sh
 SHASUM=$(shasum -a 256 "/path/to/vault-auth-google" | cut -d " " -f1)
+```
+
+* Register the binary and its SHASUM in Vault's plugin catalog
+
+```sh
 vault write sys/plugins/catalog/vault-auth-google \
   sha_256="$SHASUM" \
   command="vault-auth-google"
 ```
 
-* Mount the auth method:
+* Finally, mount the `vault-auth-google` as an auth method.
 
 ```sh
 vault auth enable \
@@ -89,115 +102,81 @@ vault auth enable \
 ```
 
 
-## Configuration
+## Configuration & Usage
 
-The plugin is set to receive four parameters, two of which are required:
+The configuration of this auth method depends on the kind of the Google Account
+used and the OAuth2 flow. Both Gmail and G Suite accounts requires OAuth2
+credentials for user authentication, but the [kind of flow can
+differ](https://developers.google.com/identity/protocols/OAuth2).
 
- - _(string)_ `client_id` __*__: The Google OAuth client id.
- - _(string)_ `client_secret` __*__: The Google OAuth client secret.
- - _(boolean)_ `fetch_groups`: Should the plugin bound policies to groups? `true` if yes, `false` otherwise.
- - _(string)_ `redirect_url`: The URL that google will redirect after the OAuth
-     flow. This URL should also be added at the credentials authorized URIs..
+The plugin can be configured via parameters. Each parameter have a different
+effect on the plugin and serves different purposes.
+
+
+### Parameters
+
+`vault-auth-google` can be configured via five parameters, two of which are
+required:
+
+ - _(string)_ `client_id` __*__: The Google OAuth2 Client ID.
+ - _(string)_ `client_secret` __*__: The Google OAuth2 Client secret.
+ - _(boolean)_ `fetch_groups`: Should the plugin bound policies to groups? **true** if yes, **false** otherwise.
+ - _(string)_ `redirect_url`: The URL that Google will redirect after the
+     OAuth2 flow. This URL should also be added at the credentials authorized URIs.
+ - _(string_ `delegation_user`: The Google user that delegates the API permission.
+ - _(string)_ `service_acc_key`: The content of the Service Account private key.
 
 __* Required parameters__
 
 
-Configuring the auth method:
+### Local flow vs. Web-based flow
 
-```sh
-vault write auth/google/config \
-    client_id=<GOOGLE_CLIENT_ID> \
-    client_secret=<GOOGLE_CLIENT_SECRET> \
-    redirect_url="https://domain.com/redirect" \
-    fetch_groups=true
-```
+The flow can be made on the [local
+machine](https://developers.google.com/identity/protocols/OAuth2InstalledApp)
+or via [web
+services](https://developers.google.com/identity/protocols/OAuth2WebServer).
 
+Local authentication flows generates a temporary, one-time usage Google token.
+The Google OAuth token have to be written in Vault, so it can then generate
+it's own access token with policy builtin on.
 
-## Usage
+The difference between a local flow and a web-based flow on this plugin mostly
+relies on the `redirect_url` parameter. This parameter is optional and unset by
+default. When unset, the plugin assumes a local flow. Since Vault cannot handle
+a GET callback from Google, the token has to be feeded manually. E.g.:
 
-### Creating roles
-
- - _(string)_ `bound_emails`: The list of emails bound to the role.
- - _(string)_ `bound_domain`: The domain name bound to the role. When
-     defining a bounded domain, the plugin expects that the emails are part of
-     the domain.
- - _(string)_ `bound_groups`: The google group email bound the to role. When
-     bounding a group to a role, every user within the group will be assigned to
-     the policy.
- - _(string)_ `policies`: The policy name associated with the role.
-
-#### Gmail
-
-Creating a role to a Gmail account:
-```sh
-vault write auth/google/role/default \
-    bound_emails=user@gmail.com \
-    policies=default
-```
-
-#### G Suite
-
-Creating a role to a G Suite account, bounding a groups:
-```sh
-vault write auth/google/role/default \
-    bound_domain=<DOMAIN> \
-    bound_groups=sec@<DOMAIN>,infra@<DOMAIN> \
-    policies=default
-```
-
-
-### Google's OAuth URL
-
-* Login using Google credentials
+* Gets a Google OAuth flow URL from Vault and opens it with Firefox.
 
 ```sh
 firefox $(vault read -field=url auth/google/code_url)
-vault write auth/google/login code=$GOOGLE_CODE role=default
 ```
 
-
-## Local environment setup
-
-* Clone this repo
+* Writes the Google code on Vault for a token generation.
 
 ```sh
-git clone git@github.com:erozario/vault-auth-google.git
+vault write auth/google/login code=<GOOGLE-OAUTH2-CODE> role=default
 ```
 
-* Create a temporary directory to compile the plugin into and to use as the plugin directory for Vault:
+Alternatively, when `redirect_url` is setted, the plugin assumes a web-based
+flow and uses the given URL as  the Redirect URI used by the Google OAuth2
+credential. It is important to notice that this URL has to be a web application
+ready to handle GET requests, since Google will make the request on it, passing
+the authorization code as a GET parameter.
 
-```sh
-mkdir -p /tmp/vault-plugins
-```
 
-* Compile the plugin into the temporary directory:
+### How to...
 
-```sh
-go build -o /tmp/vault-plugins/vault-auth-google
-```
+* [Configure `vault-auth-google` and use it for Gmail accounts](docs/gmail.md)
+* [Configure `vault-auth-google` and use it for G Suite accounts (with group bounding)](docs/gsuite.md)
 
-* Create a configuration file to point Vault at this plugin directory:
 
-```sh
-tee /tmp/vault.hcl <<EOF
-plugin_directory = "/tmp/vault-plugins"
-EOF
-```
+## Contributing
 
-* Start a Vault server in development mode with the configuration:
-
-```sh
-vault server -dev -dev-root-token-id="root" -config=/tmp/vault.hcl &
-```
-
-* Leave this running and open a new tab or terminal window. Authenticate to Vault:
-
-```sh
-export VAULT_ADDR='http://127.0.0.1:8200'
-vault login root
-```
+If you wish to contribute to this project, either by fixing a bug or suggesting
+new functionalities, check the documentation on how to setup a [local
+environment for development](docs/local-dev.md).
 
 
 ## License
 
-This code is licensed under the Mozilla Public License.
+This project is licensed under the [Mozilla Public License](LICENSE).

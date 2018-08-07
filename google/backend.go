@@ -45,11 +45,11 @@ func newBackend() *backend {
 				Fields: map[string]*framework.FieldSchema{
 					clientIDConfigPropertyName: &framework.FieldSchema{
 						Type:        framework.TypeString,
-						Description: "Google application ID",
+						Description: "Google OAuth client id",
 					},
 					clientSecretConfigPropertyName: &framework.FieldSchema{
 						Type:        framework.TypeString,
-						Description: "Google application secret",
+						Description: "Google OAuth client secret",
 					},
 					clientOAuthRedirectUrlPropertyName: &framework.FieldSchema{
 						Type:        framework.TypeString,
@@ -58,6 +58,14 @@ func newBackend() *backend {
 					clientFetchGroupsConfigPropertyName: &framework.FieldSchema{
 						Type:        framework.TypeBool,
 						Description: "Google fetch groups",
+					},
+					clientServiceAccountKeyConfigPropertyName: &framework.FieldSchema{
+						Type:        framework.TypeString,
+						Description: "Google service account key content",
+					},
+					clientDelegationUserConfigPropertyName: &framework.FieldSchema{
+						Type:        framework.TypeString,
+						Description: "Google delegation email address",
 					},
 				},
 
