@@ -41,10 +41,11 @@ vault write auth/google/config \
 After configuring the auth method, a role, bounding a given email to a policy,
 is required. The following parameters are expected to create a role:
 
- - _(string)_ `bound_emails`: The list of emails bound to the policy.
- - _(string)_ `policies`: The policy name associated with the role.
+ - _(string)_ `bound_emails`: A list of email addresses bounding users to a
+     given policy.
+ - _(string)_ `policies`: The list of policies associated with the role.
 
-### Creating a role to a Gmail account:
+### Creating a role bounding a policy to a Gmail account
 
 The following snippet creates a role named `default`, bounding the email
 `user@gmail.com`  to the policy `my-policy`. For multiple association,
@@ -53,5 +54,5 @@ delimiter the email addresses by comma.
 ```sh
 vault write auth/google/role/default \
     bound_emails="user@gmail.com" \
-    policies=my-policy
+    policies="my-policy"
 ```
