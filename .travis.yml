@@ -1,0 +1,17 @@
+# .travis.yml
+language: go
+go:
+  - '1.10.2'
+
+before_install:
+  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+
+install:
+  - dep ensure -v
+
+script:
+  - go build
+  - rm vault-auth-google
+
+after_success:
+  - test -n "$TRAVIS_TAG" && curl -sL https://git.io/goreleaser | bash

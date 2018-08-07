@@ -1,12 +1,13 @@
 package google
 
 import (
-	"context"
 	"errors"
 	"fmt"
 
+	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
-	"google.golang.org/api/admin/directory/v1"
+	"golang.org/x/oauth2/google"
+	directory "google.golang.org/api/admin/directory/v1"
 	goauth "google.golang.org/api/oauth2/v2"
 
 	"github.com/hashicorp/vault/logical"
@@ -142,20 +143,22 @@ func (b *backend) authenticate(config *config, token *oauth2.Token) (*goauth.Use
 
 	groups := []string{}
 	if config.FetchGroups {
-		groupsService, err := admin.New(client)
+		scope := "https://www.googleapis.com/auth/admin.directory.group.readonly"
+
+		serviceAccountCredential, err := google.JWTConfigFromJSON([]byte(config.ServiceAccount), scope)
 		if err != nil {
 			return nil, nil, err
 		}
 
-		request := groupsService.Groups.List()
-		request.UserKey(user.Email)
-		response, err := request.Do()
+		serviceAccountCredential.Subject = config.DelegationUser
+		saClient, err := directory.New(serviceAccountCredential.Client(context.Background()))
 		if err != nil {
 			return nil, nil, err
 		}
 
-		for _, group := range response.Groups {
-			groups = append(groups, group.Email)
+		response, err := saClient.Groups.List().UserKey(user.Email).Do()
+		for _, g := range response.Groups {
+			groups = append(groups, g.Email)
 		}
 	}
 
