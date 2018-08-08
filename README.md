@@ -25,6 +25,7 @@ Suite only).
 
 | Plugin Version | Vault 0.9.x  | Vault 0.10.x |
 |----------------|--------------|--------------|
+| 1.0.0          | :thumbsdown: | :thumbsup:   |
 | 0.1.0          | :thumbsdown: | :thumbsup:   |
 
 
