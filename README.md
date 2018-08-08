@@ -1,4 +1,4 @@
-# Vault Auth Google
+# Vault Auth Google [![Build Status](https://travis-ci.com/erozario/vault-auth-google.svg?branch=master)](https://travis-ci.com/erozario/vault-auth-google) [![Go Report Card](https://goreportcard.com/badge/github.com/erozario/vault-auth-google)](https://goreportcard.com/report/github.com/erozario/vault-auth-google)
 
 A [Hashicorp Vault](https://github.com/hashicorp/vault) plugin that enables
 authentication and policy bounding via Google Accounts and Google Groups (G
