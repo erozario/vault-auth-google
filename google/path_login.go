@@ -157,6 +157,10 @@ func (b *backend) authenticate(config *config, token *oauth2.Token) (*goauth.Use
 		}
 
 		response, err := saClient.Groups.List().UserKey(user.Email).Do()
+		if err != nil {
+			return nil, nil, err
+		}
+
 		for _, g := range response.Groups {
 			groups = append(groups, g.Email)
 		}

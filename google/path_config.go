@@ -16,7 +16,7 @@ const (
 	configPath                                = "config"
 	clientIDConfigPropertyName                = "client_id"
 	clientSecretConfigPropertyName            = "client_secret"
-	clientOAuthRedirectUrlPropertyName        = "redirect_url"
+	clientOAuthRedirectURLPropertyName        = "redirect_url"
 	clientFetchGroupsConfigPropertyName       = "fetch_groups"
 	clientServiceAccountKeyConfigPropertyName = "service_acc_key"
 	clientDelegationUserConfigPropertyName    = "delegation_user"
@@ -27,7 +27,7 @@ func (b *backend) pathConfigWrite(ctx context.Context, req *logical.Request, dat
 	var (
 		clientID       = data.Get(clientIDConfigPropertyName).(string)
 		clientSecret   = data.Get(clientSecretConfigPropertyName).(string)
-		redirectUrl    = data.Get(clientOAuthRedirectUrlPropertyName).(string)
+		redirectURL    = data.Get(clientOAuthRedirectURLPropertyName).(string)
 		fetchGroups    = data.Get(clientFetchGroupsConfigPropertyName).(bool)
 		serviceAccount = data.Get(clientServiceAccountKeyConfigPropertyName).(string)
 		delegationUser = data.Get(clientDelegationUserConfigPropertyName).(string)
@@ -36,7 +36,7 @@ func (b *backend) pathConfigWrite(ctx context.Context, req *logical.Request, dat
 	entry, err := logical.StorageEntryJSON(configEntry, config{
 		ClientID:       clientID,
 		ClientSecret:   clientSecret,
-		RedirectUrl:    redirectUrl,
+		RedirectURL:    redirectURL,
 		FetchGroups:    fetchGroups,
 		ServiceAccount: serviceAccount,
 		DelegationUser: delegationUser,
@@ -60,7 +60,7 @@ func (b *backend) pathConfigRead(ctx context.Context, req *logical.Request, data
 	configMap := map[string]interface{}{
 		clientIDConfigPropertyName:                config.ClientID,
 		clientSecretConfigPropertyName:            config.ClientSecret,
-		clientOAuthRedirectUrlPropertyName:        config.RedirectUrl,
+		clientOAuthRedirectURLPropertyName:        config.RedirectURL,
 		clientFetchGroupsConfigPropertyName:       config.FetchGroups,
 		clientServiceAccountKeyConfigPropertyName: config.ServiceAccount,
 		clientDelegationUserConfigPropertyName:    config.DelegationUser,
@@ -92,23 +92,23 @@ func (b *backend) config(ctx context.Context, s logical.Storage) (*config, error
 type config struct {
 	ClientID       string `json:"client_id"`
 	ClientSecret   string `json:"client_secret"`
-	RedirectUrl    string `json:"redirect_url"`
+	RedirectURL    string `json:"redirect_url"`
 	FetchGroups    bool   `json:"fetch_groups"`
 	ServiceAccount string `json:"service_acc_key"`
 	DelegationUser string `json:"delegation_user"`
 }
 
 func (c *config) oauth2Config() *oauth2.Config {
-	oauthRedirectUrl := c.RedirectUrl
-	if len(strings.TrimSpace(oauthRedirectUrl)) == 0 {
-		oauthRedirectUrl = "urn:ietf:wg:oauth:2.0:oob"
+	oauthRedirectURL := c.RedirectURL
+	if len(strings.TrimSpace(oauthRedirectURL)) == 0 {
+		oauthRedirectURL = "urn:ietf:wg:oauth:2.0:oob"
 	}
 
 	config := &oauth2.Config{
 		ClientID:     c.ClientID,
 		ClientSecret: c.ClientSecret,
 		Endpoint:     google.Endpoint,
-		RedirectURL:  oauthRedirectUrl,
+		RedirectURL:  oauthRedirectURL,
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.email",
 		},
