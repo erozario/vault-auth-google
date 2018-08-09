@@ -51,7 +51,7 @@ func newBackend() *backend {
 						Type:        framework.TypeString,
 						Description: "Google OAuth client secret",
 					},
-					clientOAuthRedirectUrlPropertyName: {
+					clientOAuthRedirectURLPropertyName: {
 						Type:        framework.TypeString,
 						Description: "Google OAuth redirect URL",
 					},
