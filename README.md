@@ -165,6 +165,42 @@ ready to handle GET requests, since Google will make the request on it, passing
 the authorization code as a GET parameter.
 
 
+### Bare-minimum settings
+
+Below lies a simple, bare-minimum configuration that enables
+`vault-auth-google` to work properly alongside your Vault server.
+
+```hcl
+listener "tcp" {
+        address = "0.0.0.0:8200"
+}
+
+storage "file" {
+        path = "/path/to/data"
+}
+
+plugin_directory = "/path/to/vault/plugin/dir"
+api_addr = "https://vault.domain.com:8200"
+```
+
+Beyond the required parameters, such as `listener` and `storage`, attention
+should be given to `plugin_directory` and `api_addr`.
+
+* The [`plugin_directory`](https://www.vaultproject.io/docs/configuration/index.html#plugin_directory)
+  parameter tells Vault in which directory rests all plugins used by it. Have
+  you downloaded or compiled the plugin, the binary should be located at the
+  absolute path defined in this parameter.
+
+* The [`api_addr`](https://www.vaultproject.io/docs/configuration/index.html#api_addr)
+  parameter specifies the address of the Vault server listener, for client
+  redirection (i.e., when the main Vault Server receives a request that points
+  to another server, in which listener should the client be redirect to?).
+  Since `vault-auth-google` is, in practice, another Vault server, this
+  parameter should be setted; otherwise, the plugin will not be able to respond
+  and will fail in every request made upon him. In general this should be set
+  as a full URL that points to the value of the listener address.
+
+
 ### How to...
 
 * [Configure `vault-auth-google` and use it for Gmail accounts](docs/gmail.md)
