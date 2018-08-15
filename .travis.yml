@@ -12,6 +12,7 @@ install:
 script:
   - go build
   - rm vault-auth-google
+  - git checkout -- Gopkg.lock
 
 after_success:
   - test -n "$TRAVIS_TAG" && curl -sL https://git.io/goreleaser | bash
