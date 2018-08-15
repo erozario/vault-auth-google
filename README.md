@@ -16,6 +16,7 @@ Suite only).
  - [Configuration & Usage](#configuration--usage)
     - [Parameters](#binary)
     - [Local flow vs. Web-based flow](#local-flow-vs-web-based-flow)
+    - [Bare-minimum settings](#bare-minimum-settings)
     - [How to...](#how-to)
  - [Contributing](#contributing)
  - [License](#license)
